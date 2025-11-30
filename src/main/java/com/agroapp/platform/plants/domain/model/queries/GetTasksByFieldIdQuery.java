@@ -1,0 +1,5 @@
+package com.agroapp.platform.plants.domain.model.queries;
+
+public record GetTasksByFieldIdQuery(Long fieldId) {
+}
+
