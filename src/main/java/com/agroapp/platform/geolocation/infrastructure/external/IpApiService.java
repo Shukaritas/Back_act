@@ -1,33 +1,39 @@
 package com.agroapp.platform.geolocation.infrastructure.external;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.agroapp.platform.geolocation.infrastructure.external.dto.IpApiLocationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * External service for consuming the ipapi.co REST API.
- * Uses RestTemplate for synchronous HTTP requests.
+ * Uses native HttpURLConnection for synchronous HTTP requests with custom User-Agent.
  */
 @Service
 public class IpApiService {
 
     private static final Logger logger = LoggerFactory.getLogger(IpApiService.class);
-    private static final String IPAPI_BASE_URL = "https://ipapi.co/{ip}/json/";
+    private static final String IPAPI_BASE_URL = "https://ipapi.co/";
     private static final String DEFAULT_LOCATION = "Ubicación desconocida";
+    private static final String USER_AGENT = "java-ipapi-v1.02";
 
-    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-    public IpApiService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public IpApiService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     /**
      * Fetches location information from ipapi.co based on the provided IP address.
      *
      * @param ipAddress The IP address to geolocate
-     * @return A formatted location string "City, Country" or default message if fails
+     * @return A formatted location string "Region, Country" or default message if fails
      */
     public String getLocationByIp(String ipAddress) {
         try {
@@ -40,10 +46,24 @@ public class IpApiService {
 
             logger.info("Fetching location for IP: {}", ipAddress);
 
-            IpApiLocationResponse response = restTemplate.getForObject(
-                IPAPI_BASE_URL,
-                IpApiLocationResponse.class,
-                ipAddress
+            // Create URL and connection with custom User-Agent
+            URL url = new URL(IPAPI_BASE_URL + ipAddress + "/json/");
+            URLConnection connection = url.openConnection();
+            connection.setRequestProperty("User-Agent", USER_AGENT);
+
+            // Read response
+            StringBuilder jsonResponse = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonResponse.append(line);
+                }
+            }
+
+            // Parse JSON response
+            IpApiLocationResponse response = objectMapper.readValue(
+                jsonResponse.toString(),
+                IpApiLocationResponse.class
             );
 
             if (response == null) {
@@ -56,18 +76,18 @@ public class IpApiService {
                 return DEFAULT_LOCATION;
             }
 
-            // Build location string: "City, Country"
-            String city = response.city() != null ? response.city() : "";
+            // Build location string: "Region, Country"
+            String region = response.region() != null ? response.region() : "";
             String country = response.countryName() != null ? response.countryName() : "";
 
-            if (city.isEmpty() && country.isEmpty()) {
+            if (region.isEmpty() && country.isEmpty()) {
                 logger.warn("No location data available for IP: {}", ipAddress);
                 return DEFAULT_LOCATION;
             }
 
-            String location = city.isEmpty() ? country :
-                             country.isEmpty() ? city :
-                             city + ", " + country;
+            String location = region.isEmpty() ? country :
+                             country.isEmpty() ? region :
+                             region + ", " + country;
 
             logger.info("Location resolved for IP {}: {}", ipAddress, location);
             return location;

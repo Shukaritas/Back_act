@@ -152,13 +152,14 @@ public class UsersController {
         userCommandService.handle(command);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/debug-ip")
     public ResponseEntity<String> debugIp(HttpServletRequest request) {
-    String ip = getClientIpAddress(request);
-    // Llama al servicio para ver qué respondería la API sin crear usuario
-    String location = locationService.resolveLocationFromIp(ip); 
-    
-    return ResponseEntity.ok(String.format("Tu IP detectada es: %s | Ubicación resuelta: %s", ip, location));
-}
+        String ip = getClientIpAddress(request);
+        // Llama al servicio para ver qué respondería la API sin crear usuario
+        String location = locationService.resolveLocationFromIp(ip);
+
+        return ResponseEntity.ok(String.format("Tu IP detectada es: %s | Ubicación resuelta: %s", ip, location));
+    }
 }
 
