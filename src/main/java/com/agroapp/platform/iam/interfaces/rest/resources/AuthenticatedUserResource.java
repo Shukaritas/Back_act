@@ -4,7 +4,8 @@ public record AuthenticatedUserResource(
         Long id,
         String userName,
         String email,
-        String token
+        String token,
+        boolean isLocationPublic
 ) {
 }
 

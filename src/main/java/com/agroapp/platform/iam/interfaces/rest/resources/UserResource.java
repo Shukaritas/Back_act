@@ -6,7 +6,8 @@ public record UserResource(
         String email,
         String phoneNumber,
         String identificator,
-        String location
+        String location,
+        boolean isLocationPublic
 ) {
 }
 

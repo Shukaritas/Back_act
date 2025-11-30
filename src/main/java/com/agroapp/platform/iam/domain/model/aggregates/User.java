@@ -31,6 +31,9 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     @Column
     private String location;
 
+    @Column(nullable = false)
+    private boolean isLocationPublic;
+
     /**
      * Default constructor required by JPA.
      */
@@ -86,6 +89,7 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         this.phoneNumber = phoneNumber.trim();
         this.identificator = identificator.trim();
         this.location = location;
+        this.isLocationPublic = true; // Default: location is public
     }
 
     /**
@@ -95,9 +99,10 @@ public class User extends AuditableAbstractAggregateRoot<User> {
      * @param userName New user name
      * @param email New email
      * @param phoneNumber New phone number
+     * @param isLocationPublic New location privacy setting
      * @return The updated User instance (fluent interface)
      */
-    public User updateProfile(String userName, String email, String phoneNumber) {
+    public User updateProfile(String userName, String email, String phoneNumber, boolean isLocationPublic) {
         // Validate userName
         if (userName == null || userName.trim().isEmpty()) {
             throw new IllegalArgumentException("User name cannot be empty");
@@ -122,6 +127,18 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         this.userName = userName.trim();
         this.email = email.trim().toLowerCase();
         this.phoneNumber = phoneNumber.trim();
+        this.isLocationPublic = isLocationPublic;
+        return this;
+    }
+
+    /**
+     * Toggles the location privacy setting.
+     * Business logic method for changing location visibility.
+     *
+     * @return The updated User instance (fluent interface)
+     */
+    public User toggleLocationPrivacy() {
+        this.isLocationPublic = !this.isLocationPublic;
         return this;
     }
 

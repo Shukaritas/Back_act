@@ -81,7 +81,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         }
 
         User user = userOptional.get();
-        user.updateProfile(command.userName(), command.email(), command.phoneNumber());
+        user.updateProfile(command.userName(), command.email(), command.phoneNumber(), command.isLocationPublic());
         User updatedUser = userRepository.save(user);
 
         // Publish event to notify other bounded contexts about the user profile update

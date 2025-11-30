@@ -4,7 +4,8 @@ public record UpdateUserProfileCommand(
         Long userId,
         String userName,
         String email,
-        String phoneNumber
+        String phoneNumber,
+        boolean isLocationPublic
 ) {
 }
 

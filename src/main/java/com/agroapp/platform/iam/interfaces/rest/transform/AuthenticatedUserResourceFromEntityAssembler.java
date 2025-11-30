@@ -9,7 +9,8 @@ public class AuthenticatedUserResourceFromEntityAssembler {
                 user.getId(),
                 user.getUserName(),
                 user.getEmail(),
-                token
+                token,
+                user.isLocationPublic()
         );
     }
 }
