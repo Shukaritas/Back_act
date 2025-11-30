@@ -8,6 +8,11 @@ WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
+# --- CORRECCIÓN AQUÍ ---
+# Le damos permisos de ejecución al wrapper antes de usarlo
+RUN chmod +x mvnw
+# -----------------------
+
 # Download dependencies (cached layer)
 RUN ./mvnw dependency:go-offline -B
 
@@ -24,7 +29,7 @@ WORKDIR /app
 # Copy the built JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose port (will use PORT env var from Railway)
+# Expose port
 EXPOSE 8080
 
 # Run the application
